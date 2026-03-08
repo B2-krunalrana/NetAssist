@@ -60,23 +60,28 @@ To see the logs, open your browser's Developer Tools (F12) and check the Console
      ```
    - Start the local API server:
      ```bash
-     python app.py          # listens on http://localhost:5000
+     python app.py          # listens on http://0.0.0.0:5000 (accessible from network)
      ```
 
-   Currently the backend is a simple Flask application with a single
-   endpoint (`POST /api/ticket`) that forwards the incoming JSON payload
-   to a `lambda_function.handler` routine.  That handler logs the received
-   data and returns an acknowledgement.  Later this can be replaced by an
-   actual AWS/Azure/GCP Lambda or any other processing logic.
+   The backend is a single file (`app.py`) containing a Flask application
+   with a built-in lambda-style handler. It exposes one endpoint
+   (`POST /api/ticket`) that prints the received JSON payload to the console
+   and sends a professional HTML email to the user with ticket details.
+   Configure SMTP settings in the code for email delivery.
 
 4. **Workflow**
    - Fill out the support ticket form in the React frontend. On submit the
-     form data is logged to the browser console *and* sent as a JSON
-     request to `http://localhost:5000/api/ticket`.
-   - The Python backend prints all received values to the terminal via the
-     `lambda_function` module (see `backend/lambda_function.py`).
-   - After successful submission the UI shows a mock ticket ID and a
+     form generates a ticket ID, logs the data to console, and sends as JSON
+     to `http://localhost:5000/api/ticket`.
+   - The Python backend prints the JSON, sends an email to the user with
+     details in branded HTML format using the same ticket ID, and returns
+     confirmation.
+   - After successful submission the UI shows the ticket ID and a
      redirect button to the ACT dashboard.
+
+   **SMTP Configuration**: Update `SMTP_SERVER`, `SENDER_EMAIL`, and
+   `SENDER_PASSWORD` in `backend/app.py` with your email provider's settings
+   (e.g., Gmail with app password).
 
 
 ## Architecture Overview
@@ -85,9 +90,8 @@ This repository is structured as a simple full‑stack prototype:
 
 - **`src/`** – React + TypeScript + Tailwind frontend.  Handles user input,
   form validation, geolocation and a lightweight workflow.
-- **`backend/`** – Python service acting as a placeholder for an
-  eventual serverless lambda or API gateway.  It currently uses Flask to
-  expose one endpoint and delegate processing to a `lambda_function`.
+- **`backend/app.py`** – Single Python file with Flask app and lambda handler.
+  Exposes `POST /api/ticket` to receive form data and print it.
 
 The two parts communicate over HTTP (`fetch` from the frontend to the
 backend).  In a production environment the backend could be deployed as a

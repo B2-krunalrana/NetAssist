@@ -33,6 +33,7 @@ interface TicketData {
   selectedIssues: string[];
   otherIssueDetails: string;
   remarks: string;
+  ticketId: string;
   location?: {
     lat: number;
     lng: number;
@@ -61,7 +62,8 @@ export default function App() {
     city: 'vaso',
     selectedIssues: [],
     otherIssueDetails: '',
-    remarks: ''
+    remarks: '',
+    ticketId: ''
   });
 
   // Handle input changes
@@ -133,8 +135,10 @@ export default function App() {
       });
       const result = await res.json();
       console.log('Backend response:', result);
+      return result;
     } catch (err) {
       console.error('Error sending to backend:', err);
+      return null;
     }
   };
 
@@ -142,14 +146,19 @@ export default function App() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Generate ticket ID
+    const newTicketId = `ACT-2026-${Math.floor(10000 + Math.random() * 90000)}`;
+
+    // Add ticket ID to form data
+    const dataToSend = { ...formData, ticketId: newTicketId };
+
     // Log values for future triggers as requested
-    console.log('Form Submitted with values:', formData);
+    console.log('Form Submitted with values:', dataToSend);
 
     // send the payload to our local python endpoint
-    await sendToBackend(formData);
+    await sendToBackend(dataToSend);
 
-    // Generate a mock ticket ID
-    const newTicketId = `ACT-2026-${Math.floor(10000 + Math.random() * 90000)}`;
+    // Set ticket ID for display
     setTicketId(newTicketId);
 
     // Show success screen
