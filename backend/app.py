@@ -7,11 +7,10 @@ from email.mime.multipart import MIMEMultipart
 import requests
 
 
-SENDER_PASSWORD_var=""
-SENDER_EMAIL_var=""
-agent_id_var= "" 
-bolona_Authorization_var=""
-
+SENDER_PASSWORD_var=
+SENDER_EMAIL_var=
+agent_id_var= 
+bolona_Authorization_var=
 
 
 app = Flask(__name__)
@@ -107,6 +106,10 @@ def send_ticket_email(ticket_data: Dict[str, Any], ticket_id: str):
                     <p><strong>Other Details:</strong> {ticket_data.get('otherIssueDetails', 'N/A')}</p>
                     <p><strong>Remarks:</strong> {ticket_data.get('remarks', 'N/A')}</p>
                 </div>
+                <p>
+                <b>I am currently using a Bolna trial account, which can only make calls to verified phone numbers.</b><br>
+                If you would like to receive a call, please reply to this email with your phone number. I will verify it so you can test this feature.
+                </p>
                 <p>Our technical team will review your ticket and get back to you shortly. You can track the status using your Ticket ID.</p>
                 <div class="branding">
                     <p><strong>Made by Krunal Rana</strong></p>
