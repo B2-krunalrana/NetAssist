@@ -4,6 +4,15 @@ from typing import Any, Dict
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import requests
+
+
+SENDER_PASSWORD_var=""
+SENDER_EMAIL_var=""
+agent_id_var= "" 
+bolona_Authorization_var=""
+
+
 
 app = Flask(__name__)
 # allow cross‑origin requests from the frontend development server
@@ -15,8 +24,8 @@ def send_ticket_email(ticket_data: Dict[str, Any], ticket_id: str):
     # SMTP configuration (replace with your actual settings)
     SMTP_SERVER = 'smtp.gmail.com'  # or your SMTP server
     SMTP_PORT = 587
-    SENDER_EMAIL = 'work.krunalrana@gmail.com'  # replace
-    SENDER_PASSWORD = 'xxx xxx xxx xxx'  # replace with app password
+    SENDER_EMAIL = SENDER_EMAIL_var  # replace
+    SENDER_PASSWORD = SENDER_PASSWORD_var  # replace with app password
     RECEIVER_EMAIL = ticket_data.get('email', 'user@example.com')
 
     # Create message
@@ -128,6 +137,29 @@ def send_ticket_email(ticket_data: Dict[str, Any], ticket_id: str):
         print(f"Failed to send email: {e}")
 
 
+def trigger_bolna_call(phone_number: str):
+    """Trigger a voice call via Bolna.ai API with the given phone number."""
+    url = "https://api.bolna.ai/call"
+    
+    payload = {
+        "agent_id": agent_id_var,
+        "recipient_phone_number": phone_number
+    }
+    
+    headers = {
+        "Authorization": bolona_Authorization_var,
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        response = requests.post(url, json=payload, headers=headers)
+        print(f"Bolna API response: {response.text}")
+        return response.json()
+    except Exception as e:
+        print(f"Failed to trigger Bolna call: {e}")
+        return None
+
+
 def handler(event: Dict[str, Any]) -> Dict[str, Any]:
     """Process an incoming event (ticket form data).
 
@@ -140,12 +172,26 @@ def handler(event: Dict[str, Any]) -> Dict[str, Any]:
 
     # Get ticket ID from event
     ticket_id = event['ticketId']
+    phone_number = event.get('phoneNumber', '')
 
     # Send email with ticket details
     send_ticket_email(event, ticket_id)
 
+    # Trigger Bolna.ai voice call if phone number available
+    if phone_number:
+        # Format phone number with country code if needed
+        formatted_phone = phone_number if phone_number.startswith('+') else f"+91{phone_number}"
+        bolna_response = trigger_bolna_call(formatted_phone)
+    else:
+        bolna_response = None
+
     # Return ticket ID and status
-    return {"status": "received", "ticket_id": ticket_id, "received": event}
+    return {
+        "status": "received",
+        "ticket_id": ticket_id,
+        "bolna_response": bolna_response,
+        "received": event
+    }
 
 
 @app.route("/api/ticket", methods=["POST"])

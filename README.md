@@ -29,6 +29,8 @@ The application logs all form values and button clicks to the console. This is i
 
 To see the logs, open your browser's Developer Tools (F12) and check the Console tab.
 
+> **📌 Backend Deployment?** See [backend/README.md](backend/README.md) for detailed setup, configuration, and AWS Lambda deployment instructions.
+
 ---
 
 ## Getting Started
@@ -68,6 +70,8 @@ To see the logs, open your browser's Developer Tools (F12) and check the Console
    (`POST /api/ticket`) that prints the received JSON payload to the console
    and sends a professional HTML email to the user with ticket details.
    Configure SMTP settings in the code for email delivery.
+   
+   **→ For AWS Lambda deployment, SMTP config, and troubleshooting, see [backend/README.md](backend/README.md)**
 
 4. **Workflow**
    - Fill out the support ticket form in the React frontend. On submit the

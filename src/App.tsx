@@ -189,9 +189,15 @@ export default function App() {
             <a href="https://www.actcorp.in" target="_blank" rel="noopener noreferrer">
               <img src="https://www.actcorp.in/themes/custom/actcorp/logo.svg" alt="Home" loading="eager" width="90" height="32"></img>
             </a>
-              <h2 className="text-slate-900 text-lg font-bold leading-tight tracking-tight">
-                Fibernet <span className="font-normal text-slate-500">| NetAssist Support</span>
-              </h2>
+            <div className="flex items-center gap-2">
+              <Ticket className="text-[#ec5b13]" size={24} />
+              <div>
+                <h2 className="text-slate-900 text-lg font-bold leading-tight tracking-tight">
+                  Fibernet <span className="font-normal text-slate-500">| NetAssist Support</span>
+                </h2>
+                <p className="text-[10px] text-slate-400">Ticketing System</p>
+              </div>
+            </div>
             
           </div>
           
