@@ -123,17 +123,35 @@ export default function App() {
     );
   };
 
+  // helper to send data to backend endpoint
+  const sendToBackend = async (data: TicketData) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/ticket', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const result = await res.json();
+      console.log('Backend response:', result);
+    } catch (err) {
+      console.error('Error sending to backend:', err);
+    }
+  };
+
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Log values for future triggers as requested
     console.log('Form Submitted with values:', formData);
-    
+
+    // send the payload to our local python endpoint
+    await sendToBackend(formData);
+
     // Generate a mock ticket ID
     const newTicketId = `ACT-2026-${Math.floor(10000 + Math.random() * 90000)}`;
     setTicketId(newTicketId);
-    
+
     // Show success screen
     setIsSubmitted(true);
   };
@@ -461,7 +479,7 @@ export default function App() {
                     <Home size={18} />
                     Go to Dashboard
                   </button>
-                  <button 
+                  {/* <button 
                     onClick={() => {
                       handleButtonClick('view_status');
                       setIsSubmitted(false);
@@ -469,7 +487,7 @@ export default function App() {
                     className="px-8 py-4 bg-slate-100 text-slate-700 font-bold rounded-lg hover:bg-slate-200 transition-all"
                   >
                     View Ticket Status
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </motion.div>
