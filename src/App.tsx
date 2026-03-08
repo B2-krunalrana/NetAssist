@@ -131,7 +131,8 @@ export default function App() {
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const backendUrl = isLocal
       ? 'http://localhost:5000/api/ticket'
-      : 'https://q2ksbnmhvbzlnwzzxo5ddn6nau0jdfak.lambda-url.ap-south-1.on.aws/';
+      :'https://q2ksbnmhvbzlnwzzxo5ddn6nau0jdfak.lambda-url.ap-south-1.on.aws/api/ticket';
+      // : 'https://q2ksbnmhvbzlnwzzxo5ddn6nau0jdfak.lambda-url.ap-south-1.on.aws/';
 
     try {
       const res = await fetch(backendUrl, {
