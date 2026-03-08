@@ -173,27 +173,19 @@ export default function App() {
       <header className="w-full border-b border-slate-200 bg-white sticky top-0 z-50 shadow-sm">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="size-8 bg-[#ec5b13] rounded-lg flex items-center justify-center text-white">
+            {/* <div className="size-8 bg-[#ec5b13] rounded-lg flex items-center justify-center text-white">
               <Wifi size={20} />
-            </div>
-            <h2 className="text-slate-900 text-lg font-bold leading-tight tracking-tight">
-              ACT Fibernet <span className="font-normal text-slate-500">| NetAssist Support</span>
-            </h2>
+              
+            </div> */}
+            <a href="https://www.actcorp.in" target="_blank" rel="noopener noreferrer">
+              <img src="https://www.actcorp.in/themes/custom/actcorp/logo.svg" alt="Home" loading="eager" width="90" height="32"></img>
+            </a>
+              <h2 className="text-slate-900 text-lg font-bold leading-tight tracking-tight">
+                Fibernet <span className="font-normal text-slate-500">| NetAssist Support</span>
+              </h2>
+            
           </div>
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => handleButtonClick('notifications')}
-              className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors"
-            >
-              <Bell size={20} />
-            </button>
-            <button 
-              onClick={() => handleButtonClick('profile')}
-              className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors"
-            >
-              <UserCircle size={24} />
-            </button>
-          </div>
+          
         </div>
       </header>
 
@@ -502,7 +494,7 @@ export default function App() {
             © {new Date().getFullYear()} ACT Fibernet Support Services. All rights reserved.
           </p>
           <p className="text-slate-400 text-xs mb-6">
-            created by <span className="font-semibold text-slate-600">Krunal Rana</span> and powerd by <a href="https://bolna.ai/" target="_blank" rel="noopener noreferrer" className="text-[#ec5b13] hover:underline">bolna.ai/</a>
+            created by <span className="font-semibold text-slate-600"><a href="https://www.linkedin.com/in/krunal-rana/" target="_blank">Krunal Rana</a></span> and powerd by <a href="https://bolna.ai/" target="_blank" rel="noopener noreferrer" className="text-[#ec5b13] hover:underline">bolna.ai</a>
           </p>
           <div className="flex justify-center gap-6">
             <button onClick={() => handleButtonClick('privacy')} className="text-xs text-slate-400 hover:text-[#ec5b13] transition-colors">Privacy Policy</button>
