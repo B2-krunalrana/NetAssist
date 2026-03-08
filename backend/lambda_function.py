@@ -218,3 +218,28 @@ def lambda_handler(event, context):
             'received': data
         })
     }
+
+
+"""
+In test case we can use belwo as input json 
+
+{
+  "version": "2.0",
+  "routeKey": "POST /api/ticket",
+  "rawPath": "/api/ticket",
+  "rawQueryString": "",
+  "headers": {
+    "content-type": "application/json"
+  },
+  "requestContext": {
+    "http": {
+      "method": "POST",
+      "path": "/api/ticket",
+      "protocol": "HTTP/1.1"
+    }
+  },
+  "body": "{\"ticketId\":\"TEST123\",\"customerName\":\"John Doe\",\"phoneNumber\":\"9824085934\",\"email\":\"ranakrunal2704@gmail.com\",\"wifiId\":\"270485\",\"city\":\"Mumbai\",\"selectedIssues\":[\"No connectivity\"],\"otherIssueDetails\":\"\",\"remarks\":\"Test ticket\"}",
+  "isBase64Encoded": false
+}
+
+"""
