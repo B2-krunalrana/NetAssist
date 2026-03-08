@@ -1,0 +1,5 @@
+{
+  "name": "ACT Fibernet Support",
+  "description": "A support ticket management system for ACT Fibernet customers, powered by Bolna.ai.",
+  "requestFramePermissions": ["geolocation"]
+}
