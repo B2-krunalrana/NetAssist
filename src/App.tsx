@@ -127,8 +127,14 @@ export default function App() {
 
   // helper to send data to backend endpoint
   const sendToBackend = async (data: TicketData) => {
+    // Determine backend URL based on environment
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const backendUrl = isLocal
+      ? 'http://localhost:5000/api/ticket'
+      : 'https://q2ksbnmhvbzlnwzzxo5ddn6nau0jdfak.lambda-url.ap-south-1.on.aws/';
+
     try {
-      const res = await fetch('http://localhost:5000/api/ticket', {
+      const res = await fetch(backendUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),

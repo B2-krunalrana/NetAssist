@@ -1,39 +1,28 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from typing import Any, Dict
+import os
+import json
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import requests
 
+# Environment variables (set in Lambda configuration)
+SENDER_PASSWORD = os.environ.get('SENDER_PASSWORD')
+SENDER_EMAIL = os.environ.get('SENDER_EMAIL')
+AGENT_ID = os.environ.get('AGENT_ID')
+BOLNA_AUTHORIZATION = os.environ.get('BOLNA_AUTHORIZATION')
 
-SENDER_PASSWORD_var=""
-SENDER_EMAIL_var=""
-agent_id_var= "" 
-bolona_Authorization_var=""
-
-
-app = Flask(__name__)
-# allow cross‑origin requests from the frontend development server
-CORS(app)
-
-
-def send_ticket_email(ticket_data: Dict[str, Any], ticket_id: str):
+def send_ticket_email(ticket_data, ticket_id):
     """Send a professional HTML email with ticket details."""
-    # SMTP configuration (replace with your actual settings)
-    SMTP_SERVER = 'smtp.gmail.com'  # or your SMTP server
+    SMTP_SERVER = 'smtp.gmail.com'
     SMTP_PORT = 587
-    SENDER_EMAIL = SENDER_EMAIL_var  # replace
-    SENDER_PASSWORD = SENDER_PASSWORD_var  # replace with app password
     RECEIVER_EMAIL = ticket_data.get('email', 'user@example.com')
 
-    # Create message
     msg = MIMEMultipart('alternative')
     msg['Subject'] = f'ACT Fibernet Support Ticket #{ticket_id}'
     msg['From'] = SENDER_EMAIL
     msg['To'] = RECEIVER_EMAIL
 
-    # HTML content with clean white theme and branding
+    # HTML content – copy your full HTML from the original code
     html = f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -123,37 +112,30 @@ def send_ticket_email(ticket_data: Dict[str, Any], ticket_id: str):
     </body>
     </html>
     """
-
-    # Attach HTML
     part = MIMEText(html, 'html')
     msg.attach(part)
 
     try:
-        # Send email
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
         server.starttls()
         server.login(SENDER_EMAIL, SENDER_PASSWORD)
         server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
         server.quit()
-        print(f"Email sent successfully to {RECEIVER_EMAIL}")
+        print(f"Email sent to {RECEIVER_EMAIL}")
     except Exception as e:
         print(f"Failed to send email: {e}")
 
-
-def trigger_bolna_call(phone_number: str):
-    """Trigger a voice call via Bolna.ai API with the given phone number."""
+def trigger_bolna_call(phone_number):
+    """Trigger a voice call via Bolna.ai API."""
     url = "https://api.bolna.ai/call"
-    
     payload = {
-        "agent_id": agent_id_var,
+        "agent_id": AGENT_ID,
         "recipient_phone_number": phone_number
     }
-    
     headers = {
-        "Authorization": bolona_Authorization_var,
+        "Authorization": BOLNA_AUTHORIZATION,
         "Content-Type": "application/json"
     }
-    
     try:
         response = requests.post(url, json=payload, headers=headers)
         print(f"Bolna API response: {response.text}")
@@ -162,49 +144,77 @@ def trigger_bolna_call(phone_number: str):
         print(f"Failed to trigger Bolna call: {e}")
         return None
 
-
-def handler(event: Dict[str, Any]) -> Dict[str, Any]:
-    """Process an incoming event (ticket form data).
-
-    The function logs the contents, sends an email with ticket details,
-    and returns the ticket ID.
+def lambda_handler(event, context):
     """
-    print("\n--- lambda_function.handler called ---")
-    print(event)
-    print("--- end of event ---\n")
+    Handle incoming HTTP requests via Lambda Function URL or API Gateway.
+    Expected: POST /api/ticket with JSON body.
+    """
+    # 1. Parse the HTTP method and path (optional – you can ignore if only one endpoint)
+    http_method = event.get('requestContext', {}).get('http', {}).get('method')
+    path = event.get('requestContext', {}).get('http', {}).get('path')
 
-    # Get ticket ID from event
-    ticket_id = event['ticketId']
-    phone_number = event.get('phoneNumber', '')
+    # 2. Only accept POST requests to /api/ticket (adjust if your Function URL is already scoped)
+    if http_method != 'POST' or path != '/api/ticket':
+        return {
+            'statusCode': 404,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',  # Enable CORS
+            },
+            'body': json.dumps({'error': 'Not found'})
+        }
 
-    # Send email with ticket details
-    send_ticket_email(event, ticket_id)
+    # 3. Parse the request body
+    try:
+        if 'body' in event:
+            # If using API Gateway REST API, body is a string
+            if event.get('isBase64Encoded', False):
+                import base64
+                body = base64.b64decode(event['body']).decode('utf-8')
+            else:
+                body = event['body']
+            data = json.loads(body)
+        else:
+            # For Lambda Function URL, body is already parsed? Actually Function URL provides raw string.
+            # Safer to check type.
+            data = json.loads(event['body']) if isinstance(event.get('body'), str) else event.get('body', {})
+    except Exception as e:
+        return {
+            'statusCode': 400,
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'error': 'Invalid JSON body'})
+        }
 
-    # Trigger Bolna.ai voice call if phone number available
+    # 4. Process the ticket (same logic as before)
+    ticket_id = data.get('ticketId')
+    if not ticket_id:
+        return {
+            'statusCode': 400,
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+            'body': json.dumps({'error': 'Missing ticketId'})
+        }
+
+    phone_number = data.get('phoneNumber', '')
+    send_ticket_email(data, ticket_id)
+
+    bolna_response = None
     if phone_number:
-        # Format phone number with country code if needed
         formatted_phone = phone_number if phone_number.startswith('+') else f"+91{phone_number}"
         bolna_response = trigger_bolna_call(formatted_phone)
-    else:
-        bolna_response = None
 
-    # Return ticket ID and status
+    # 5. Return success response
     return {
-        "status": "received",
-        "ticket_id": ticket_id,
-        "bolna_response": bolna_response,
-        "received": event
+        'statusCode': 200,
+        'headers': {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',   # Enable CORS
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type'
+        },
+        'body': json.dumps({
+            'status': 'received',
+            'ticket_id': ticket_id,
+            'bolna_response': bolna_response,
+            'received': data
+        })
     }
-
-
-@app.route("/api/ticket", methods=["POST"])
-def ticket():
-    """Receive ticket data from the frontend and forward to the lambda handler."""
-    data = request.get_json(force=True)
-    result = handler(data)
-    return jsonify(result)
-
-
-if __name__ == "__main__":
-    # listen on all interfaces for network access
-    app.run(host="0.0.0.0", port=5000, debug=True)
